@@ -23,10 +23,10 @@ public class TransactionService {
         return transactionList;
     }
 
-    public List<Transaction> getTransactionsFiltered(String product, String type, Double minAmount, Double maxAmount) {
+    public List<Transaction> getTransactionsFiltered(String product, TransactionType type, Double minAmount, Double maxAmount) {
         return transactionList.stream()
                 .filter(transaction -> product == null || transaction.product().equals(product))
-                .filter(transaction -> type == null || transaction.product().equals(type))
+                .filter(transaction -> type == null || transaction.type().equals(type))
                 .filter(transaction -> minAmount == null || transaction.amount() >= minAmount)
                 .filter(transaction -> maxAmount == null || transaction.amount() <= maxAmount)
                 .collect(Collectors.toList());
