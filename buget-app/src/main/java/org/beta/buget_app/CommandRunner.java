@@ -32,9 +32,8 @@ public class CommandRunner implements CommandLineRunner {
                 new Transaction(10, "Product A", TransactionType.SELL, 60.0)
         );
 
-        transactionService.setTransactionList(transactionList);
+        transactionService.saveAllTransactions(transactionList);
 
-        // Optionally print the transactions to the console
         transactionService.getTransactions().forEach(System.out::println);
     }
 }

@@ -3,6 +3,8 @@ package org.beta.buget_app.service;
 import lombok.RequiredArgsConstructor;
 import org.beta.buget_app.enums.TransactionType;
 import org.beta.buget_app.model.Transaction;
+import org.beta.buget_app.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,56 +14,54 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransactionService {
 
-    private final List<Transaction> transactionList = new ArrayList<>();
-
-    public void setTransactionList(List<Transaction> transactionList) {
-        this.transactionList.clear();
-        this.transactionList.addAll(transactionList);
-    }
+    @Autowired
+    private final TransactionRepository transactionRepository;
 
     public List<Transaction> getTransactions() {
-        return transactionList;
+        return transactionRepository.findAll();
     }
 
+    public void saveAllTransactions(List<Transaction> transactionList) {
+        transactionRepository.saveAll(transactionList);
+    }
+
+    //TODO: to be optimized!!!!
     public List<Transaction> getTransactionsFiltered(String product, TransactionType type, Double minAmount, Double maxAmount) {
-        return transactionList.stream()
-                .filter(transaction -> product == null || transaction.product().equals(product))
-                .filter(transaction -> type == null || transaction.type().equals(type))
-                .filter(transaction -> minAmount == null || transaction.amount() >= minAmount)
-                .filter(transaction -> maxAmount == null || transaction.amount() <= maxAmount)
+        return transactionRepository.findAll().stream()
+                .filter(transaction -> product == null || transaction.getProduct().equals(product))
+                .filter(transaction -> type == null || transaction.getType().equals(type))
+                .filter(transaction -> minAmount == null || transaction.getAmount() >= minAmount)
+                .filter(transaction -> maxAmount == null || transaction.getAmount() <= maxAmount)
                 .collect(Collectors.toList());
     }
 
     public Optional<Transaction> getTransactionById(int id) {
-        return transactionList.stream()
-                .filter(transaction -> transaction.id() == id)
-                .findFirst();
+        return transactionRepository.findById(id);
     }
 
     public Transaction addTransaction(Transaction transaction) {
-        transactionList.add(transaction);
-        return transaction;
+        return transactionRepository.save(transaction);
     }
 
     public Optional<Transaction> updateTransaction(int id, Transaction newTransaction) {
-        return getTransactionById(id).map(existingTransaction -> {
-            int index = transactionList.indexOf(existingTransaction);
-            transactionList.set(index, newTransaction);
-            return newTransaction;
-        });
+        return transactionRepository.findById(id).map(existingTransaction -> transactionRepository.save(newTransaction));
     }
 
     public boolean deleteTransactionById(int id) {
-        return transactionList.removeIf(transaction -> transaction.id() == id);
+        if (transactionRepository.existsById(id)) {
+            transactionRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     public Map<TransactionType, List<Transaction>> getTransactionsByType() {
-        return transactionList.stream()
-                .collect(Collectors.groupingBy(Transaction::type));
+        return transactionRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Transaction::getType));
     }
 
     public Map<String, List<Transaction>> getTransactionsByProduct() {
-        return transactionList.stream()
-                .collect(Collectors.groupingBy(Transaction::product));
+        return transactionRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Transaction::getProduct));
     }
 }
