@@ -25,15 +25,10 @@ public class TransactionService {
         transactionRepository.saveAll(transactionList);
     }
 
-    //TODO: to be optimized!!!!
     public List<Transaction> getTransactionsFiltered(String product, TransactionType type, Double minAmount, Double maxAmount) {
-        return transactionRepository.findAll().stream()
-                .filter(transaction -> product == null || transaction.getProduct().equals(product))
-                .filter(transaction -> type == null || transaction.getType().equals(type))
-                .filter(transaction -> minAmount == null || transaction.getAmount() >= minAmount)
-                .filter(transaction -> maxAmount == null || transaction.getAmount() <= maxAmount)
-                .collect(Collectors.toList());
+        return transactionRepository.findFilteredTransactions(product, type, minAmount, maxAmount);
     }
+
 
     public Optional<Transaction> getTransactionById(int id) {
         return transactionRepository.findById(id);
